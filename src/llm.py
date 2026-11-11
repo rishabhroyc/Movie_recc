@@ -115,7 +115,7 @@ def parse_request(text, call=None):
 def explain(items, call=None):
     """One reason per item. Reasons that fail the fact check, or are missing, become template sentences."""
     call = call or call_llm
-    facts = [{k: v for k, v in it.items() if k != "movie_id"} for it in items]
+    facts = [{k: v for k, v in it.items() if k not in ("movie_id", "imdb_url")} for it in items]
     by_title = {}
     try:
         raw = extract_json(call(EXPLAIN_SYSTEM, json.dumps(facts)))

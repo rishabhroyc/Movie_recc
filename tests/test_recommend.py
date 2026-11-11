@@ -65,3 +65,10 @@ def test_explainer_keeps_a_clean_reason():
     it = REC.recommend(int(D.user_ids[1]), req(), k=1)["items"][0]
     good = '[{"title": "%s", "reason": "Rated %.1f on average."}]' % (it["title"], it["avg_rating"])
     assert not explain([it], call=lambda s, u: good)[0]["fallback"]
+
+
+def test_recommendations_include_valid_imdb_url():
+    out = REC.recommend(int(D.user_ids[0]), req(), k=3)
+    assert out["items"]
+    for it in out["items"]:
+        assert it["imdb_url"].startswith("https://www.imdb.com/")
