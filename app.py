@@ -14,14 +14,24 @@ st.set_page_config(page_title="ReadNext", layout="wide")
 def get_rec():
     bundle_path = ART_DIR / "bundle.pkl"
     if not bundle_path.exists():
-        return None
+        with st.spinner("Initializing recommender model..."):
+            from src.data import download, load_dataset
+            from src.split import make_split
+            from src.models import ALS, build_item_vecs, save_bundle
+            download("ml-1m")
+            ratings, movies = load_dataset("ml-1m")
+            D = make_split(ratings, movies)
+            als = ALS(32, 0.1, 10).fit(D.M["rel_train"])
+            item_vecs = build_item_vecs(D.movies)
+            alpha = 0.5
+            ART_DIR.mkdir(parents=True, exist_ok=True)
+            save_bundle(bundle_path, movies=D.movies, item_ids=D.item_ids, user_ids=D.user_ids,
+                        item_vecs=item_vecs, als_user=als.user_f, als_item=als.item_f, alpha=alpha,
+                        seen_all=D.M["seen_all"], rel_all=D.M["rel_all"])
     return Recommender(load_bundle(bundle_path))
 
 
 rec = get_rec()
-if rec is None:
-    st.error("Model bundle not found at artifacts/bundle.pkl. Run `python -m scripts.train` first.")
-    st.stop()
 
 tab_demo, tab_results = st.tabs(["Try it", "Results"])
 
