@@ -2,11 +2,9 @@ numpy
 pandas>=2.0
 scipy
 scikit-learn
-implicit>=0.7        # real ALS; without it the code falls back to SVD (smoke tests only)
 pydantic>=2
 streamlit
 pytest
 certifi
 python-dotenv
-anthropic            # only if LLM_PROVIDER=anthropic
-openai               # for LLM_PROVIDER=grok, groq, or openai
+openai
