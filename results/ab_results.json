@@ -1,0 +1,15 @@
+{
+  "p_a": 0.264,
+  "p_b": 0.372,
+  "lift": 0.10799999999999998,
+  "ci_low": 0.05066070331788153,
+  "ci_high": 0.16533929668211844,
+  "p_value": 0.0002455983368132575,
+  "n_a": 500,
+  "n_b": 500,
+  "n_needed_per_arm_for_2pp_lift": 7806,
+  "diversity_A_distinct_genres": 10.916,
+  "diversity_B_distinct_genres": 9.224,
+  "aa_false_positive_rate": 0.042,
+  "label": "SIMULATED: offline replay of held-out ratings, not real traffic"
+}
