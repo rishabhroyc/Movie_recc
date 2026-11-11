@@ -1,7 +1,10 @@
 """Filter + rank. No LLM in this file: the ranker decides which movies come back."""
+import json
+import re
+import urllib.parse
 import difflib
 import numpy as np
-from src.config import GENRES, MIN_RATINGS_SERVE
+from src.config import GENRES, MIN_RATINGS_SERVE, ART_DIR
 from src.guardrails import norm_title
 from src.models import ALS, Content, Hybrid, minmax
 
@@ -31,6 +34,15 @@ class Recommender:
         for i in np.argsort(self.n_ratings):      # most-rated movie wins when titles collide
             self.title_index[norm_title(self.movies["title"].iat[i])] = int(i)
 
+        # Optional IMDb link lookup
+        self.imdb_map = {}
+        links_json = ART_DIR / "imdb_links.json"
+        if links_json.exists():
+            try:
+                self.imdb_map = json.loads(links_json.read_text())
+            except Exception:
+                pass
+
     def resolve_title(self, text):
         """Fuzzy match a typed title to a real catalogue movie index, or None."""
         key = norm_title(text)
@@ -49,7 +61,15 @@ class Recommender:
 
     def _facts(self, u, i):
         row = self.movies.iloc[i]
-        f = {"movie_id": int(self.item_ids[i]), "title": row["title"],
+        mid = int(self.item_ids[i])
+        imdb_id = self.imdb_map.get(str(mid))
+        if imdb_id:
+            imdb_url = f"https://www.imdb.com/title/tt{str(imdb_id).zfill(7)}/"
+        else:
+            clean_title = re.sub(r", (The|A|An)\s*\(", " (", row["title"])
+            imdb_url = f"https://www.imdb.com/find/?q={urllib.parse.quote_plus(clean_title)}"
+
+        f = {"movie_id": mid, "title": row["title"], "imdb_url": imdb_url,
              "year": None if np.isnan(row["year"]) else int(row["year"]),
              "genres": list(row["genres"]), "avg_rating": round(float(row["avg_rating"]), 1),
              "n_ratings": int(row["n_ratings"])}

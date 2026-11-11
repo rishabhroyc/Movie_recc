@@ -63,7 +63,12 @@ with tab_demo:
 
         if out["items"]:
             for it, ex in zip(out["items"], explain(out["items"])):
-                st.subheader(it["title"])
+                title = it["title"]
+                imdb_url = it.get("imdb_url")
+                if imdb_url:
+                    st.subheader(f"[{title}]({imdb_url})")
+                else:
+                    st.subheader(title)
                 st.caption(f"{', '.join(it['genres'])} | Avg rating: {it['avg_rating']}/5 ({it['n_ratings']:,} ratings)")
                 st.write(ex["reason"])
                 if ex["fallback"]:
